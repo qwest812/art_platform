@@ -15,7 +15,7 @@ public class Teleport : MonoBehaviour
 
     private void Update()
     {
-        if (inTeleportArea && Input.GetKey(KeyCode.E))
+        if (inTeleportArea && Input.GetKeyDown(KeyCode.E))
         {
             Vector3 newPosition = playerColider.transform.position;
             newPosition.x = NewPosition.position.x;

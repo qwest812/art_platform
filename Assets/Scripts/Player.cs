@@ -40,12 +40,12 @@ public class Player : MonoBehaviour
 
         HandleMovement(speed);
 
-        if (Input.GetKey(KeyCode.T))
+        if (Input.GetKeyDown (KeyCode.T))
         {
             GetComponent<SpriteRenderer>().color = Color.green;
         }
 
-        if (Input.GetKey(KeyCode.Y))
+        if (Input.GetKeyDown (KeyCode.Y))
         {
             GetComponent<Rigidbody2D>().gravityScale *= -1;
         }
