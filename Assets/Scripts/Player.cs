@@ -16,36 +16,47 @@ public class Player : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private Rigidbody2D _rb;
     private bool _isGrounded;
-    
+    private Animator _animator;
+
     void Start()
     {
         _prevPosition = transform.position;
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _rb = GetComponent<Rigidbody2D>();
-    }
-    
-    void Update()
-    {
-        _isGrounded = Physics2D.OverlapArea(new Vector2(transform.position.x - 0.2f, transform.position.y - 0.3f),
-            new Vector2(transform.position.x + 0.2f, transform.position.y - 0.31f),
-            groundLayer);
+        _animator = GetComponent<Animator>();
     }
 
-    private void FixedUpdate()
+    void Update()
     {
+        _isGrounded = Physics2D.OverlapArea(new Vector2(transform.position.x - 0.5f, transform.position.y - 0.4f),
+            new Vector2(transform.position.x + 0.2f, transform.position.y - 0.31f),
+            groundLayer);
+
         if (_isGrounded && Input.GetButtonDown("Jump"))
         {
             Jump();
         }
 
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+        {
+            _animator.Play("Walk");
+        }
+        else
+        {
+            _animator.Play("idle");
+        }
+    }
+
+    private void FixedUpdate()
+    {
         HandleMovement(speed);
 
-        if (Input.GetKeyDown (KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T))
         {
             GetComponent<SpriteRenderer>().color = Color.green;
         }
 
-        if (Input.GetKeyDown (KeyCode.Y))
+        if (Input.GetKeyDown(KeyCode.Y))
         {
             GetComponent<Rigidbody2D>().gravityScale *= -1;
         }
@@ -83,6 +94,12 @@ public class Player : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D collision)
     {
+        Collider2D collidedCollider = collision.collider;
+        if (collidedCollider != null)
+        {
+            // Do something with the collided collider
+            Debug.Log("Collided with: " + collidedCollider.name);
+        }
         if (collision.gameObject.CompareTag("Ground"))
         {
             _prevPosition = transform.position;
@@ -91,7 +108,6 @@ public class Player : MonoBehaviour
 
     public void MoveToPrevPosition()
     {
-        Vector3 p = _prevPosition;
         _prevPosition.x -= 0.5f;
         transform.position = _prevPosition;
     }
