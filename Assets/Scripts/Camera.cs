@@ -13,10 +13,10 @@ public class Camera : MonoBehaviour
     {
         if (playerTransform != null)
         {
-            // playerTransform.position);
-            Vector3 desiredPosition = playerTransform.position;
+            Vector3 playerPosition = playerTransform.position;
+            Vector3 desiredPosition = new Vector3(playerPosition.x, playerPosition.y + 15, playerPosition.z);     
             Vector3 newPosition = Vector3.Lerp(playerTransform.position, desiredPosition, smoothSpeed);
-            newPosition.z = transform.position.z;
+            newPosition.z = -10;
             transform.position = newPosition;
         }
     }

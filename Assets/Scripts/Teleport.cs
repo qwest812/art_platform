@@ -10,16 +10,16 @@ public class Teleport : MonoBehaviour
     [SerializeField] private KeyCode inputKey;
     private bool inTeleportArea;
     private Collider2D playerColider;
-    [SerializeField] private float correct;
 
 
     private void Update()
     {
-        if (inTeleportArea && Input.GetKeyDown(KeyCode.E))
+        if (inTeleportArea && Input.GetKeyDown(inputKey))
         {
+            Debug.Log(NewPosition.position.y);
             Vector3 newPosition = playerColider.transform.position;
             newPosition.x = NewPosition.position.x;
-            newPosition.y = NewPosition.position.y - correct;
+            newPosition.y = NewPosition.position.y;
             playerColider.transform.position = newPosition;
         }
     }
@@ -31,19 +31,7 @@ public class Teleport : MonoBehaviour
             inTeleportArea = true;
             playerColider = other;
         }
-
-        {
-            // Vector3 newPosition = other.transform.position;
-            // newPosition.x = transform.position.x;
-            // newPosition.y = transform.position.y+ 0.5f;
-            // other.transform.position = newPosition;
-
-
-            // Vector3 newPosition = other.transform.position;
-
-            // Debug.Log("Player entered the teleporter trigger zone!");
-            // Implement your teleportation logic here
-        }
+        
     }
 
     void OnTriggerExit2D(Collider2D other)

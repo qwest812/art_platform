@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using Unity.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -10,27 +12,88 @@ public class Player : MonoBehaviour
     public LayerMask groundLayer;
     public float speedUp = 2f;
     public float speedDown = 2f;
-
+    public Renderer spriteRender;
+    public int heals;
+    [SerializeField]
+    [System.ComponentModel.ReadOnly(true)]
+    private int coins;
 
     private Vector3 _prevPosition;
-    private SpriteRenderer _spriteRenderer;
     private Rigidbody2D _rb;
+
+    [SerializeField] [Unity.Collections.ReadOnly]
     private bool _isGrounded;
+
     private Animator _animator;
+    private SpriteRenderer _sprite;
+    private bool _isGravityChange;
+
+
+    // Определение переменных за пределами методов, чтобы они были доступны везде в классе
+    private Vector2 bottomLeft;
+    private Vector2 topRight;
 
     void Start()
     {
         _prevPosition = transform.position;
-        _spriteRenderer = GetComponent<SpriteRenderer>();
         _rb = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
+        _animator = spriteRender.GetComponent<Animator>();
+        _sprite = spriteRender.GetComponent<SpriteRenderer>();
+    }
+
+    // Метод, вызываемый Unity для визуализации гизмо
+    private void OnDrawGizmos()
+    {
+        // Обновление координат для OverlapArea
+        UpdateOverlapAreaCoordinates();
+
+        // Визуализация OverlapArea в редакторе Unity
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(bottomLeft, new Vector2(topRight.x, bottomLeft.y));
+        Gizmos.DrawLine(new Vector2(topRight.x, bottomLeft.y), topRight);
+        Gizmos.DrawLine(topRight, new Vector2(bottomLeft.x, topRight.y));
+        Gizmos.DrawLine(new Vector2(bottomLeft.x, topRight.y), bottomLeft);
+    }
+
+    // Метод для обновления координат OverlapArea
+    private void UpdateOverlapAreaCoordinates()
+    {
+        if (_isGravityChange)
+        {
+            bottomLeft = new Vector2(transform.position.x + 0.3f, transform.position.y + 1.2f);
+            topRight = new Vector2(transform.position.x - 0.3f, transform.position.y + 1.35f);
+        }
+        else
+        {
+            bottomLeft = new Vector2(transform.position.x - 0.3f, transform.position.y - 0.05f);
+            topRight = new Vector2(transform.position.x + 0.3f, transform.position.y + 0.1f);
+        }
     }
 
     void Update()
     {
-        _isGrounded = Physics2D.OverlapArea(new Vector2(transform.position.x - 0.5f, transform.position.y - 0.4f),
-            new Vector2(transform.position.x + 0.2f, transform.position.y - 0.31f),
-            groundLayer);
+        // // Проверка наличия перекрытияфв
+        // Collider2D overlap = Physics2D.OverlapArea(bottomLeft, topRight, groundLayer);
+        //
+        // if (overlap != null)
+        // {
+        //     Debug.Log("Ground detected!");
+        // }
+
+        if (_isGravityChange)
+        {
+            bottomLeft = new Vector2(transform.position.x + 0.3f, transform.position.y + 1.2f);
+            topRight = new Vector2(transform.position.x - 0.3f, transform.position.y + 1.35f);
+        }
+        else
+        {
+            bottomLeft = new Vector2(transform.position.x - 0.3f, transform.position.y - 0.05f);
+            topRight = new Vector2(transform.position.x + 0.3f, transform.position.y + 0.1f);
+        }
+
+        // bottomLeft = new Vector2(transform.position.x - 0.3f, transform.position.y - 0.05f);
+        // topRight = new Vector2(transform.position.x + 0.3f, transform.position.y + 0.1f);
+        _isGrounded = Physics2D.OverlapArea(bottomLeft, topRight, groundLayer);
 
         if (_isGrounded && Input.GetButtonDown("Jump"))
         {
@@ -39,11 +102,13 @@ public class Player : MonoBehaviour
 
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
         {
-            _animator.Play("Walk");
+            _animator.SetInteger("State", 1);
+            // _animator.Play("Walk");
         }
         else
         {
-            _animator.Play("idle");
+            _animator.SetInteger("State", 0);
+            // _animator.Play("idle");
         }
     }
 
@@ -64,7 +129,14 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        _rb.velocity = new Vector2(_rb.velocity.x, jumpForce);
+        if (_isGravityChange)
+        {
+            _rb.velocity = new Vector2(_rb.velocity.x, -jumpForce);
+        }
+        else
+        {
+            _rb.velocity = new Vector2(_rb.velocity.x, jumpForce);
+        }
     }
 
     private void HandleMovement(float moveSpeed)
@@ -82,24 +154,18 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += transform.right * moveSpeed;
-            _spriteRenderer.flipX = true;
+            _sprite.flipX = true;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
             transform.position -= transform.right * moveSpeed;
-            _spriteRenderer.flipX = false;
+            _sprite.flipX = false;
         }
     }
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        Collider2D collidedCollider = collision.collider;
-        if (collidedCollider != null)
-        {
-            // Do something with the collided collider
-            Debug.Log("Collided with: " + collidedCollider.name);
-        }
         if (collision.gameObject.CompareTag("Ground"))
         {
             _prevPosition = transform.position;
@@ -110,5 +176,37 @@ public class Player : MonoBehaviour
     {
         _prevPosition.x -= 0.5f;
         transform.position = _prevPosition;
+    }
+
+    public void GravityChange(bool isGravity, float gravityValue)
+    {
+        if (isGravity && !_isGravityChange)
+        {
+            _sprite.flipY = true;
+            Vector2 renderPos = spriteRender.transform.position;
+            renderPos.y += 1.3f;
+            spriteRender.transform.position = renderPos;
+            Vector2 playerPos = transform.position;
+            playerPos.y += 1.3f;
+            _rb.gravityScale = gravityValue;
+            _isGravityChange = true;
+        }
+
+        if (!isGravity && _isGravityChange)
+        {
+            _sprite.flipY = false;
+            Vector2 renderPos = spriteRender.transform.position;
+            renderPos.y -= 1.3f;
+            spriteRender.transform.position = renderPos;
+            Vector2 playerPos = transform.position;
+            playerPos.y -= 1.3f;
+            _rb.gravityScale = gravityValue;
+            _isGravityChange = false;
+        }
+    }
+
+    public void AddCoin()
+    {
+        coins++;
     }
 }
