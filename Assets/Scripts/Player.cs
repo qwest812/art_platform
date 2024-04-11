@@ -1,8 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Unity.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -13,17 +8,14 @@ public class Player : MonoBehaviour
     public float speedUp = 2f;
     public float speedDown = 2f;
     public Renderer spriteRender;
-    public int heals;
-    [SerializeField]
-    [System.ComponentModel.ReadOnly(true)]
-    private int coins;
 
+    public GameObject[] crystals;
+    
+    private int amountCrystal = 0;
     private Vector3 _prevPosition;
     private Rigidbody2D _rb;
-
-    [SerializeField] [Unity.Collections.ReadOnly]
+    private Transform _checpoint;
     private bool _isGrounded;
-
     private Animator _animator;
     private SpriteRenderer _sprite;
     private bool _isGravityChange;
@@ -39,6 +31,10 @@ public class Player : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _animator = spriteRender.GetComponent<Animator>();
         _sprite = spriteRender.GetComponent<SpriteRenderer>();
+        for (int i = crystals.Length - 1; i >= 0; i--)
+        {
+            crystals[i].SetActive(false);
+        }
     }
 
     // Метод, вызываемый Unity для визуализации гизмо
@@ -72,14 +68,6 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        // // Проверка наличия перекрытияфв
-        // Collider2D overlap = Physics2D.OverlapArea(bottomLeft, topRight, groundLayer);
-        //
-        // if (overlap != null)
-        // {
-        //     Debug.Log("Ground detected!");
-        // }
-
         if (_isGravityChange)
         {
             bottomLeft = new Vector2(transform.position.x + 0.3f, transform.position.y + 1.2f);
@@ -91,8 +79,6 @@ public class Player : MonoBehaviour
             topRight = new Vector2(transform.position.x + 0.3f, transform.position.y + 0.1f);
         }
 
-        // bottomLeft = new Vector2(transform.position.x - 0.3f, transform.position.y - 0.05f);
-        // topRight = new Vector2(transform.position.x + 0.3f, transform.position.y + 0.1f);
         _isGrounded = Physics2D.OverlapArea(bottomLeft, topRight, groundLayer);
 
         if (_isGrounded && Input.GetButtonDown("Jump"))
@@ -154,13 +140,13 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += transform.right * moveSpeed;
-            _sprite.flipX = true;
+            _sprite.flipX = false;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
             transform.position -= transform.right * moveSpeed;
-            _sprite.flipX = false;
+            _sprite.flipX = true;
         }
     }
 
@@ -176,6 +162,16 @@ public class Player : MonoBehaviour
     {
         _prevPosition.x -= 0.5f;
         transform.position = _prevPosition;
+    }
+
+    public void MoveToPosition(Vector3 pos)
+    {
+        transform.position = pos;
+    }
+
+    public void MoveToCheckPoint()
+    {
+        transform.position = _checpoint.position;
     }
 
     public void GravityChange(bool isGravity, float gravityValue)
@@ -205,8 +201,14 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void AddCoin()
+    public void addCrystal()
     {
-        coins++;
+        crystals[amountCrystal].SetActive(true);
+        amountCrystal++;
+    }
+
+    public void UpdateCheckPoint(Transform pos)
+    {
+        _checpoint = pos;
     }
 }
