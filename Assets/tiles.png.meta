@@ -69,7 +69,7 @@ TextureImporter:
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: -1
+    textureFormat: 4
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -3907,7 +3907,7 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      tiles_145: 1120011592
+      tiles_30: -1315279234
       tiles_66: -638676680
       tiles_74: 652344210
       tiles_33: 342191615
@@ -4085,8 +4085,8 @@ TextureImporter:
       tiles_175: -567824965
       tiles_140: -361248007
       tiles_164: 424900010
-      tiles_30: -1315279234
       tiles_25: 1781983068
+      tiles_145: 1120011592
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

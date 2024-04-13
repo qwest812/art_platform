@@ -10,7 +10,6 @@ public class Crystal : MonoBehaviour
         if (col.CompareTag("Player") && col.isTrigger == false)
         {
             col.gameObject.GetComponent<Player>().addCrystal();
-            col.gameObject.GetComponent<Player>().MoveToCheckPoint();
             Destroy(gameObject);
         }
     }
